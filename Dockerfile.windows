@@ -15,7 +15,7 @@ RUN choco install -y visualstudio2022-workload-vctools
 
 # Install Rust and set up MSVC toolchain
 RUN choco install -y rust; `
-    refreshenv; `
+    $env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"; `
     rustup toolchain install stable-msvc; `
     rustup default stable-msvc
 
