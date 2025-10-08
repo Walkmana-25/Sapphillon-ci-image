@@ -1,0 +1,13 @@
+# escape=`
+
+FROM rust:latest-windowsservercore
+
+# Install Chocolatey
+RUN powershell -NoProfile -ExecutionPolicy Bypass -Command `
+    "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))"
+
+# Install protobuf compiler via Chocolatey
+RUN choco install -y protoc
+
+# Verify installation
+RUN protoc --version
