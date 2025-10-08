@@ -32,6 +32,7 @@ jobs:
         run: echo "repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
       - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -55,7 +56,7 @@ jobs:
         with:
           context: .
           file: ./Dockerfile
-          push: true
+          push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo_name.outputs.repository }}:buildcache-linux
@@ -79,6 +80,7 @@ jobs:
           echo "repository=$repo" >> $env:GITHUB_OUTPUT
 
       - name: Log in to Container Registry
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -99,12 +101,14 @@ jobs:
       - name: Build and push Docker image (Windows)
         run: |
           docker build -t ${{ env.REGISTRY }}/${{ steps.repo_name.outputs.repository }}:temp-windows -f Dockerfile.windows .
-          $tags = "${{ steps.meta.outputs.tags }}" -split "`n"
-          foreach ($tag in $tags) {
-            $tag = $tag.Trim()
-            if ($tag) {
-              docker tag ${{ env.REGISTRY }}/${{ steps.repo_name.outputs.repository }}:temp-windows $tag
-              docker push $tag
+          if ($env:GITHUB_EVENT_NAME -ne "pull_request") {
+            $tags = "${{ steps.meta.outputs.tags }}" -split "`n"
+            foreach ($tag in $tags) {
+              $tag = $tag.Trim()
+              if ($tag) {
+                docker tag ${{ env.REGISTRY }}/${{ steps.repo_name.outputs.repository }}:temp-windows $tag
+                docker push $tag
+              }
             }
           }
         shell: powershell

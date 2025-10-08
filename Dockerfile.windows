@@ -10,17 +10,24 @@ RUN Set-ExecutionPolicy Bypass -Scope Process -Force; `
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
     iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
 
-# Install Rust via Chocolatey
-RUN choco install -y rust
+# Install Visual Studio 2022 Build Tools for MSVC
+RUN choco install -y visualstudio2022-workload-vctools
+
+# Install Rust and set up MSVC toolchain
+RUN choco install -y rust; `
+    refreshenv; `
+    rustup toolchain install stable-msvc; `
+    rustup default stable-msvc
 
 # Install protobuf compiler via Chocolatey
 RUN choco install -y protoc
 
-# Add Rust to PATH and verify installations
+# Verify installations
 RUN refreshenv; `
     rustc --version; `
     cargo --version; `
-    protoc --version
+    protoc --version; `
+    rustc -vV | Select-String "host"
 
 # Set working directory
 WORKDIR C:\\app
