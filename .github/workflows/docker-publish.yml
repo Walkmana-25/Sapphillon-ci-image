@@ -32,7 +32,6 @@ jobs:
         run: echo "repository=${GITHUB_REPOSITORY,,}" >> $GITHUB_OUTPUT
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
@@ -51,12 +50,24 @@ jobs:
             type=raw,value=latest-linux,enable={{is_default_branch}}
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Docker image (Linux)
+      - name: Build Docker image (Linux - PR)
+        if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo_name.outputs.repository }}:buildcache-linux
+
+      - name: Build and push Docker image (Linux - Push)
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ steps.repo_name.outputs.repository }}:buildcache-linux
@@ -80,7 +91,6 @@ jobs:
           echo "repository=$repo" >> $env:GITHUB_OUTPUT
 
       - name: Log in to Container Registry
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
