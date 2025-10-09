@@ -9,7 +9,7 @@ SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPref
 RUN Set-ExecutionPolicy Bypass -Scope Process -Force; `
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
     iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); `
-    $env:PATH = "C:\ProgramData\chocolatey\bin;" + $env:PATH; `
+    $env:PATH = 'C:\ProgramData\chocolatey\bin;' + $env:PATH; `
     choco install -y visualstudio2022-workload-vctools protoc
 
 # Manual Install Rust
