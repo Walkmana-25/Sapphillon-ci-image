@@ -5,27 +5,20 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2022
 # Set up environment
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-# Install Chocolatey
+# Install Chocolatey and all choco packages in one layer
 RUN Set-ExecutionPolicy Bypass -Scope Process -Force; `
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
-    iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-
-# Add Chocolatey to PATH
-ENV PATH="C:\ProgramData\chocolatey\bin;%PATH%"
-
-# Install Visual Studio 2022 Build Tools for MSVC
-RUN choco install -y visualstudio2022-workload-vctools
+    iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); `
+    $env:PATH = "C:\ProgramData\chocolatey\bin;" + $env:PATH; `
+    choco install -y visualstudio2022-workload-vctools protoc
 
 # Manual Install Rust
 RUN Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe; `
     ./rustup-init.exe -y --default-toolchain stable-msvc --profile default; `
     Remove-Item rustup-init.exe
 
-# Add Rust to PATH
-ENV PATH="%USERPROFILE%\\.cargo\\bin;%PATH%"
-
-# Install protobuf compiler via Chocolatey
-RUN choco install -y protoc
+# Set the final PATH environment variable for all tools
+ENV PATH="C:\ProgramData\chocolatey\bin;%USERPROFILE%\.cargo\bin;%PATH%"
 
 # Verify installations
 RUN rustc --version; `
