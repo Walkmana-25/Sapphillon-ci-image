@@ -15,8 +15,8 @@ RUN choco install -y visualstudio2022-workload-vctools
 
 # Install Rust and set up MSVC toolchain
 RUN choco install -y rust; `
-    & "$env:USERPROFILE\.cargo\bin\rustup.exe" toolchain install stable-msvc; `
-    & "$env:USERPROFILE\.cargo\bin\rustup.exe" default stable-msvc
+    & "C:\ProgramData\chocolatey\bin\rustup.exe" toolchain install stable-msvc; `
+    & "C:\ProgramData\chocolatey\bin\rustup.exe" default stable-msvc
 
 # Install protobuf compiler via Chocolatey
 RUN choco install -y protoc
