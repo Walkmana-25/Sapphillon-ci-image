@@ -19,7 +19,7 @@ RUN Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe
     Remove-Item rustup-init.exe
 
 # Add Rust to PATH
-ENV PATH="C:\Users\ContainerUser\.cargo\bin;${env:PATH}"
+ENV PATH="%USERPROFILE%\\.cargo\\bin;%PATH%"
 
 # Install protobuf compiler via Chocolatey
 RUN choco install -y protoc
