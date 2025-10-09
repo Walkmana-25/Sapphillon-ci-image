@@ -12,7 +12,7 @@ RUN Set-ExecutionPolicy Bypass -Scope Process -Force; `
     $env:PATH = 'C:\ProgramData\chocolatey\bin;' + $env:PATH; `
     choco install -y visualstudio2022-workload-vctools protoc; `
     Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe; `
-    ./rustup-init.exe -y --default-toolchain stable-msvc --profile default; `
+    ./rustup-init.exe -y --default-toolchain stable-msvc --profile minimal; `
     $env:PATH = $env:USERPROFILE + '\.cargo\bin;' + $env:PATH; `
     rustc --version; `
     cargo --version; `
