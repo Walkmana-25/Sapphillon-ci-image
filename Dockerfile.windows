@@ -5,26 +5,23 @@ FROM mcr.microsoft.com/windows/servercore:ltsc2022
 # Set up environment
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
-# Install Chocolatey and all choco packages in one layer
+# Install all dependencies and verify in a single layer
 RUN Set-ExecutionPolicy Bypass -Scope Process -Force; `
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
     iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1')); `
     $env:PATH = 'C:\ProgramData\chocolatey\bin;' + $env:PATH; `
-    choco install -y visualstudio2022-workload-vctools protoc
-
-# Manual Install Rust
-RUN Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe; `
+    choco install -y visualstudio2022-workload-vctools protoc; `
+    Invoke-WebRequest -Uri https://win.rustup.rs/x86_64 -OutFile rustup-init.exe; `
     ./rustup-init.exe -y --default-toolchain stable-msvc --profile default; `
+    $env:PATH = $env:USERPROFILE + '\.cargo\bin;' + $env:PATH; `
+    rustc --version; `
+    cargo --version; `
+    protoc --version; `
+    rustc -vV | Select-String "host"; `
     Remove-Item rustup-init.exe
 
 # Set the final PATH environment variable for all tools
 ENV PATH="C:\ProgramData\chocolatey\bin;%USERPROFILE%\.cargo\bin;%PATH%"
-
-# Verify installations
-RUN rustc --version; `
-    cargo --version; `
-    protoc --version; `
-    rustc -vV | Select-String "host"
 
 # Set working directory
 WORKDIR C:\\app
